@@ -6,6 +6,11 @@ google.charts.setOnLoadCallback(drawChart);
 
 var chartData = [[0, 0, 0, 0]]
 
+var maxBeamLoading = 100 * 9.81 //Value in Newtons
+
+var jointWeight = 1
+var beamDensityPerCM = 1
+
 var viewedGen = 1
 
 var hinge = {
@@ -21,6 +26,18 @@ var load = {
     y : 0
 }
 
+var thisGenData = []
+var nextGenData = []
+/*
+var historicalData = [
+    {
+        bestTruss : truss1,
+        medTruss : truss2,
+        worstTruss : truss3
+    }
+    
+    ]
+*/
 var drawChart = function() {
     var data = new google.visualization.DataTable()
     
@@ -159,7 +176,8 @@ var exTruss = {
         }
     ],
     connectors : [],
-    maxLoad : 0
+    maxLoad : 0,
+    weight : 0
 }
 
 exTruss.connectors = [{
@@ -206,62 +224,6 @@ exTruss.connectors = [{
             }]
 
 drawTruss(exTruss)
-
-/* Truss:
-
-{
-    points : {
-        hinge : {
-            x : val,
-            y : val
-        },
-        base : {
-            x : val,
-            y : val
-        },
-        load : {
-            x : val,
-            y : val
-        },
-        0 : {
-            x : val,
-            y : val
-        },
-        1 : {
-            x : val,
-            y : val
-        },
-        2 : {
-            x : val,
-            y : val
-        }
-    },
-    connectors : [
-            {
-                start : hinge,
-                end : a,
-                width : 24,
-                loading : 138
-            },
-            {
-                start : base,
-                end : a,
-                width : 27
-                loading : 138
-            },
-            {
-                start : hinge,
-                end : a,
-                width : 31
-                loading : 138
-            }
-        ],
-    maxLoad : 243
-}
-
-
-
-*/
 
 
 $(window).resize(function() {
@@ -321,7 +283,11 @@ var solveTruss = function(truss) {
         i = 0,
         matrixA = [], // load x,y, hinge x,y, base x,y, 0 x,y, 1 x,y, etc.. 
         matrixB = [],
-        loadedRows = {}
+        loadedRows = {},
+        trussLoading = [],
+        maxLoad = 0,
+        deltaX = 0,
+        deltaY = 0
     
     loadedRows = createEq(truss, load)
     
@@ -374,6 +340,76 @@ var solveTruss = function(truss) {
         matrixB.push(6)
     }
     
-    console.log(matrixA)
+    trussLoading = math.lusolve(matrixA, matrixB)
+    
+    for (i = 0; i < matrixSize; i++) {
+        if (trussLoading[i][0] > maxLoad) {
+            maxLoad = trussLoading[i][0]
+        }
+    }
+    for (i = 0; i < matrixSize; i++) {
+        truss.connectors[i].loading = trussLoading[i][0] * (maxBeamLoading / maxLoad)
+    }
+    
+    truss.maxLoad = (maxBeamLoading / maxLoad) * 6
+    
+    truss.weight += truss.points.length * jointWeight
+    
+    for (i = 0; i < truss.connectors.length; i++) {
+        deltaX = truss.connectors[i].end.x - truss.connectors[i].start.x
+        deltaY = truss.connectors[i].end.y - truss.connectors[i].start.y
+        truss.weight += math.sqrt(deltaX * deltaX + deltaY * deltaY) * beamDensityPerCM
+    }
+    
+//    console.log(truss.maxLoad)
+//    console.log(truss.weight)
+//    console.log(truss.maxLoad / truss.weight)
+    
 }
 
+solveTruss(exTruss)
+
+
+var createRandomTruss = function() {
+    var randomNumber = 1,
+        newTruss = {
+                        points : [],
+                        connectors : [],
+                        maxLoad : 0,
+                        weight : 0
+                    },
+        newPoint = {}
+    
+    while (randomNumber > 0.1) {
+        randomNumber = Math.random()
+        
+        newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 25) - 12.5}
+        
+        newTruss.points.append()
+        
+        if (math.random() < 0.6) {
+            newTruss.connectors.append(
+                {
+                    start : newPoint,
+                    end : load,
+                    width : 10,
+                    loading : 0
+                })
+        }
+        
+        
+    }
+}
+
+var checkTruss = function(truss) {
+    
+    // Check correct number of connections
+    
+    
+    // Check all joined
+    
+}
+
+var mutateTruss = function(truss) {
+    
+}
