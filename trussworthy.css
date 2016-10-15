@@ -40,7 +40,7 @@ body {
 
 .gendata {
     width: calc(100% - 20px);
-    margin: 5px 0 10px 10px;
+    margin: 15px 0 10px 10px;
     border-spacing: 0;
     border-top: 1px solid #1C2733;
     border-right: 1px solid #1C2733;
@@ -61,6 +61,28 @@ body {
 
 .gendata th p {
     margin: 2px;
+}
+
+.controlbutton {
+    width: calc(50% - 27px);
+    margin: 20px 0 0 15px;
+    height: 80px;
+    background-color: #4A5A70;
+    float: left;
+    border: 2px solid white;
+}
+
+.controlbutton:hover {
+    background-color: #6A81A1;
+    cursor: pointer;
+}
+
+.controlbutton p {
+    width: 100%;
+    margin: 24px 0 0 0;
+    text-align: center;
+    font-size: 25px;
+    color: white;
 }
 
 #selectgen {

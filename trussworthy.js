@@ -266,3 +266,7 @@ $(window).resize(function() {
     drawChart()
     drawTruss(exTruss)
 })
+
+var solveTruss = function() {
+    
+}
