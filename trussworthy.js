@@ -28,6 +28,7 @@ var load = {
 
 var thisGenData = []
 var nextGenData = []
+var historicalData = []
 /*
 var historicalData = [
     {
@@ -38,7 +39,7 @@ var historicalData = [
     
     ]
 */
-var drawChart = function() {
+function drawChart() {
     var data = new google.visualization.DataTable()
     
     data.addColumn('number', 'Generation')
@@ -86,21 +87,15 @@ var drawChart = function() {
 
 setTimeout(drawChart, 1000)
 
-var setViewedGen = function() {
-    viewedGen = $('#selectgen').val()
-    $('#controltile h3').html("Generation: " + viewedGen)
-}
-
 $('#selectgen').on("input", setViewedGen)
 
-setViewedGen()
 
-
-var drawTruss = function(truss) {
+var drawTruss = function() {
     var c = $('#trusscanvas')[0].getContext("2d"),
         x = $('#trusscanvas').width() * 2,
         y = $('#trusscanvas').height() * 2,
-        i = 0
+        i = 0,
+        truss = historicalData[viewedGen - 1].bestTruss
     
     
 
@@ -161,7 +156,11 @@ var drawTruss = function(truss) {
 }
 
 
-
+var setViewedGen = function() {
+    viewedGen = $('#selectgen').val()
+    $('#controltile h3').html("Generation: " + viewedGen)
+    drawTruss()
+}
 
 
 var exTruss = {
@@ -223,12 +222,10 @@ exTruss.connectors = [{
                 loading : 0
             }]
 
-drawTruss(exTruss)
-
 
 $(window).resize(function() {
     drawChart()
-    drawTruss(exTruss)
+    drawTruss()
 })
 
 var createEq = function(truss, vertex) {
@@ -340,6 +337,7 @@ var solveTruss = function(truss) {
         matrixB.push(6)
     }
     
+    //console.log("Determinant: " + math.det(matrixA))
     trussLoading = math.lusolve(matrixA, matrixB)
     
     for (i = 0; i < matrixSize; i++) {
@@ -378,38 +376,216 @@ var createRandomTruss = function() {
                         maxLoad : 0,
                         weight : 0
                     },
-        newPoint = {}
+        newPoint = {},
+        i = 0,
+        targetPoint = {},
+        j = 0
     
-    while (randomNumber > 0.1) {
-        randomNumber = Math.random()
-        
-        newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 25) - 12.5}
-        
-        newTruss.points.append()
-        
-        if (math.random() < 0.6) {
-            newTruss.connectors.append(
+    newTruss.connectors.push(
                 {
-                    start : newPoint,
-                    end : load,
+                    start : base,
+                    end : hinge,
                     width : 10,
                     loading : 0
                 })
+    
+    while (randomNumber > 0.5 || j < 2) {
+        j++
+        randomNumber = Math.random()
+        
+        newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 16) - 8}
+        
+        newTruss.points.push(newPoint)
+        
+        
+        for (i = -3; i < newTruss.points.length - 1; i++) {
+            if (i === -3) {
+                targetPoint = load
+            } else if (i === -2) {
+                targetPoint = base
+            } else if (i === -1) {
+                targetPoint = hinge
+            } else {
+                targetPoint = newTruss.points[i]
+            }
+            
+            var a = math.random()
+            
+            
+            if (a < 0.5) {
+                newTruss.connectors.push(
+                    {
+                        start : newPoint,
+                        end : targetPoint,
+                        width : 10,
+                        loading : 0
+                    })
+            }
         }
-        
-        
+    }
+    
+    if (checkTruss(newTruss)) {
+        return newTruss
+    } else {
+        return createRandomTruss()
     }
 }
 
 var checkTruss = function(truss) {
+    var i = 0,
+        j = 0,
+        counter = 0,
+        targetPoint = {},
+        targetCount = 0
     
-    // Check correct number of connections
+        // Check correct number of connections at each joint
     
+    for (i = -3; i < truss.points.length; i++) {
+        counter = 0
+        
+        switch (i) {
+            case -3:
+                targetPoint = load
+                targetCount = 2
+                break
+            case -2:
+                targetPoint = base
+                break
+            case -1:
+                targetPoint = hinge
+                break
+            default:
+                targetPoint = truss.points[i]
+                targetCount = 3
+        }
+                
+        
+        for (j = 0; j < truss.connectors.length; j++) {
+            if (Object.is(targetPoint, truss.connectors[j].start) || Object.is(targetPoint, truss.connectors[j].end)) {
+                counter++
+            }
+        }
+        if (counter < targetCount) {
+            return false
+        }
+        
+    }
     
-    // Check all joined
+    // Check solvable
     
+    if ((truss.points.length + 3) * 2 < truss.connectors.length) {
+        return false
+    }
+    
+    if (getDeterminant(truss) < 0.001) {
+        return false
+        
+    }
+    
+    return true
+    
+}
+
+var getDeterminant = function(truss) {
+    var matrixSize = truss.connectors.length,
+        i = 0,
+        matrixA = [], // load x,y, hinge x,y, base x,y, 0 x,y, 1 x,y, etc.. 
+        loadedRows = {},
+        trussLoading = [],
+        maxLoad = 0,
+        deltaX = 0,
+        deltaY = 0
+    
+    loadedRows = createEq(truss, load)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+    }
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+    }
+    
+    loadedRows = createEq(truss, base)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+    }
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+    }
+    
+    i = 0
+    
+    while (matrixA.length < matrixSize && i < truss.points.length) {
+        loadedRows = createEq(truss, truss.points[i])
+        
+        if (matrixA.length < matrixSize) {
+            matrixA.push(loadedRows.xRow)
+        }
+        
+        if (matrixA.length < matrixSize) {
+            matrixA.push(loadedRows.yRow)
+        }
+        i++
+    }
+    
+    loadedRows = createEq(truss, hinge)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+    }
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+    }
+    
+    return math.det(matrixA)
 }
 
 var mutateTruss = function(truss) {
     
 }
+
+var startEvolution = (function() {
+    var i = 0
+    
+    for (i = 0; i < 1000; i++) {
+        thisGenData.push(createRandomTruss())
+        solveTruss(thisGenData[i])
+    }
+    
+    thisGenData = thisGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    
+    historicalData.push({
+        bestTruss : thisGenData[0],
+        medTruss : thisGenData[500],
+        worstTruss : thisGenData[999]
+    })
+    console.log("a")
+    drawTruss()
+})()
+
+var nextGen = function() {
+    var i = 0
+    
+    nextGenData = []
+    
+    for (i = 0; i < 500; i++) {
+        nextGenData.push(thisGenData[i])
+    }
+    
+    for (i = 0; i < 500; i++) {
+        nextGenData.push(mutateTruss(thisGenData[i]))
+    }
+    
+    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    
+    historicalData.push({
+        bestTruss : thisGenData[0],
+        medTruss : thisGenData[500],
+        worstTruss : thisGenData[999]
+    })
+    drawTruss()
+}
+
+//setViewedGen()
