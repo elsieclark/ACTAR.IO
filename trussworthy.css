@@ -10,6 +10,202 @@ body {
     height: 100%;
 }
 
+#canvastile {
+    width: calc(55% - 8px);
+    height: calc(60% - 42px);
+    background-color: #394455;
+    margin: 0px 0px 0px 5px;
+    float: left;
+    border-radius: 5px;
+}
+
+#trusscanvas {
+    width: calc(100% - 14px);
+    height: calc(100% - 14px);
+    margin: 5px;
+    background-color: #4A5A70;
+    border-radius: 4px;
+    border: 2px solid white;
+}
+
+#controltile {
+    width: calc(45% - 8px);
+    height: calc(60% - 42px);
+    background-color: #394455;
+    margin: 0px 0px 0px 5px;
+    float: left;
+    border-radius: 5px;
+    position: relative;
+}
+
+.gendata {
+    width: calc(100% - 20px);
+    margin: 5px 0 10px 10px;
+    border-spacing: 0;
+    border-top: 1px solid #1C2733;
+    border-right: 1px solid #1C2733;
+}
+
+.gendata tr {
+    height: 13px;
+}
+
+.gendata th {
+    width: 50%;
+    border-bottom: 1px solid #1C2733;
+    border-left: 1px solid #1C2733;
+    background-color: #4A5A70;
+    color: white;
+    font-weight: 300;
+}
+
+.gendata th p {
+    margin: 2px;
+}
+
+#selectgen {
+    width: calc(100% - 100px);
+    margin: 15px 50px 15px 50px;
+    position: absolute;
+    bottom: 5px;
+}
+
+input[type=range]{
+    -webkit-appearance: none;
+    background: #7588a3;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 5px;
+    background: #7588a3;
+    border: none;
+    border-radius: 3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #F5AC07;
+    margin-top: -7px;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+output { 
+  position: absolute;
+  background-image: linear-gradient(top, #444444, #999999);
+  width: 40px; 
+  height: 30px; 
+  text-align: center; 
+  color: white; 
+  border-radius: 10px; 
+  display: inline-block; 
+  font: bold 15px/30px Georgia;
+  bottom: 175%;
+  left: 0;
+  margin-left: -1%;
+}
+output:after { 
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 10px solid #999999;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  margin-top: -1px;
+}
+
+#controltile h3 {
+    font-size: 30px;
+}
+
+#controltile #gen1 {
+    color: white;
+    position: absolute;
+    margin: 0px;
+    left: 18px;
+    bottom: 11px;
+    font-size: 21px;
+}
+
+#controltile #gencurrent {
+    color: white;
+    position: absolute;
+    margin: 0px;
+    right: 10px;
+    bottom: 11px;
+    font-size: 21px;
+    text-align: center;
+}
+
+
+
+#graphtile {
+    width: calc(55% - 8px);
+    height: calc(40% - 42px);
+    background-color: #394455;
+    margin: 5px 0px 0px 5px;
+    float: left;
+    border-radius: 5px;
+}
+
+#progressgraph {
+    width: calc(100% - 20px);
+    height: calc(100% - 30px);
+    margin: 30px 0 0 10px;
+}
+
+#datatile {
+    width: calc(45% - 8px);
+    height: calc(40% - 42px);
+    background-color: #394455;
+    margin: 5px 0px 0px 5px;
+    float: left;
+    border-radius: 5px;
+}
+
+h3 {
+    margin: 0px;
+    color: white;
+    font-size: 20px;
+    margin: 5px 0px 0px 8px;
+    font-weight: 300;
+}
+
+#databox {
+    width: calc(100% - 10px);
+    height: calc(100% - 40px);
+    margin: 5px 0 0 5px;
+    background-color: #4A5A70;
+    border-radius: 4px;
+    overflow: scroll;
+}
+
+#databox p {
+    margin: 0px;
+    padding: 8px;
+    color: white;
+    font-size: 13px;
+}
+
+
+
+
+
 #topbar {
     width: 100%;
     height: 38px;
