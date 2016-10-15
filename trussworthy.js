@@ -8,6 +8,19 @@ var chartData = [[0, 0, 0, 0]]
 
 var viewedGen = 1
 
+var hinge = {
+    x : 0,
+    y : 5
+}
+var base = {
+    x : 0,
+    y : 0
+}
+var load = {
+    x : 30,
+    y : 0
+}
+
 var drawChart = function() {
     var data = new google.visualization.DataTable()
     
@@ -131,33 +144,22 @@ var drawTruss = function(truss) {
 }
 
 
-var hinge = {
-    x : 0,
-    y : 5
-}
-var base = {
-    x : 0,
-    y : 0
-}
-var load = {
-    x : 30,
-    y : 0
-}
+
 
 
 var exTruss = {
-    points : {
-        a : {
+    points : [
+        {
             x : 10,
             y : 7
         },
-        b : {
+        {
             x : 20,
             y : -2
         }
-    },
+    ],
     connectors : [],
-    maxLoad : 243
+    maxLoad : 0
 }
 
 exTruss.connectors = [{
@@ -168,36 +170,36 @@ exTruss.connectors = [{
             },
             {
                 start : base,
-                end : exTruss.points.a,
+                end : exTruss.points[0],
                 width : 10,
                 loading : 0
             },
             {
                 start : base,
-                end : exTruss.points.b,
+                end : exTruss.points[1],
                 width : 10,
                 loading : 0
             },
             {
                 start : hinge,
-                end : exTruss.points.a,
+                end : exTruss.points[0],
                 width : 10,
                 loading : 0
             },
             {
-                start : exTruss.points.a,
-                end : exTruss.points.b,
+                start : exTruss.points[0],
+                end : exTruss.points[1],
                 width : 10,
                 loading : 0
             },
             {
-                start : exTruss.points.a,
+                start : exTruss.points[0],
                 end : load,
                 width : 10,
                 loading : 0
             },
             {
-                start : exTruss.points.b,
+                start : exTruss.points[1],
                 end : load,
                 width : 10,
                 loading : 0
@@ -267,6 +269,111 @@ $(window).resize(function() {
     drawTruss(exTruss)
 })
 
-var solveTruss = function() {
+var createEq = function(truss, vertex) {
+    var currentBeams = [],
+        xSubmit = [],
+        ySubmit = [],
+        emptySubmit = [],
+        i = 0,
+        j = 0,
+        deltaX = 0,
+        deltaY = 0
     
+    for (i = 0; i < truss.connectors.length; i++) {
+        xSubmit.push(0)
+        ySubmit.push(0)
+        emptySubmit.push(0)
+        
+        if (Object.is(truss.connectors[i].start, vertex)) {
+            
+            currentBeams.push([truss.connectors[i].start, truss.connectors[i].end])
+            
+        } else if (Object.is(truss.connectors[i].end, vertex)) {
+            
+            currentBeams.push([truss.connectors[i].end, truss.connectors[i].start])
+            
+        }
+    }
+    
+    for (i = 0; i < currentBeams.length; i++) {
+        
+        for (j = 0; j < truss.connectors.length; j++) {
+            
+            if (
+                (Object.is(currentBeams[i][1], truss.connectors[j].start) && Object.is(vertex, truss.connectors[j].end)) || (Object.is(currentBeams[i][1], truss.connectors[j].end) && Object.is(vertex, truss.connectors[j].start))) {
+                
+                deltaX = currentBeams[i][1].x - currentBeams[i][0].x
+                deltaY = currentBeams[i][1].y - currentBeams[i][0].y
+                
+                xSubmit[j] = deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+                ySubmit[j] = deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+                
+                
+                }
+            
+        }
+    }
+    return({xRow : xSubmit, yRow : ySubmit})
 }
+
+var solveTruss = function(truss) {
+    var matrixSize = truss.connectors.length,
+        i = 0,
+        matrixA = [], // load x,y, hinge x,y, base x,y, 0 x,y, 1 x,y, etc.. 
+        matrixB = [],
+        loadedRows = {}
+    
+    loadedRows = createEq(truss, load)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+        matrixB.push(0)
+    }
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+        matrixB.push(-6)
+    }
+    
+    loadedRows = createEq(truss, base)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+        matrixB.push(1)
+    }
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+        matrixB.push(0)
+    }
+    
+    i = 0
+    
+    while (matrixA.length < matrixSize && i < truss.points.length) {
+        loadedRows = createEq(truss, truss.points[i])
+        
+        if (matrixA.length < matrixSize) {
+            matrixA.push(loadedRows.xRow)
+            matrixB.push(0)
+        }
+        
+        if (matrixA.length < matrixSize) {
+            matrixA.push(loadedRows.yRow)
+            matrixB.push(0)
+        }
+        i++
+    }
+    
+    loadedRows = createEq(truss, hinge)
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.xRow)
+        matrixB.push(-1)
+    }
+    
+    if (matrixA.length < matrixSize) {
+        matrixA.push(loadedRows.yRow)
+        matrixB.push(6)
+    }
+    
+    console.log(matrixA)
+}
+
