@@ -520,7 +520,10 @@ var checkTruss = function(truss) {
     
     for(i = 0; i < truss.points.length; i++) {
         
-        if (truss.points[i].x < 4 || truss.points[i].x > 26) {
+        if (truss.points[i].x < 4 || truss.points[i].x > 24) {
+            return false
+        }
+        if (truss.points[i].y < -13 || truss.points[i].y > 13) {
             return false
         }
     }
@@ -817,9 +820,9 @@ var copyTruss = function(truss) {
         console.log(i)
     }
     
-    //thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
      
-     thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad) - (a.maxLoad)})
+    //thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad) - (a.maxLoad)})
     
     historicalData.push({
         bestTruss : thisGenData[0],
@@ -867,7 +870,9 @@ var nextGen = function() {
     
     updateInterface()
     
-    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[50].maxLoad / thisGenData[50].weight, thisGenData[99].maxLoad / thisGenData[99].weight])
+    //chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[50].maxLoad / thisGenData[50].weight, thisGenData[99].maxLoad / thisGenData[99].weight])
+    
+    chartData.push([historicalData.length, thisGenData[0].maxLoad, thisGenData[50].maxLoad, thisGenData[99].maxLoad])
     
     //console.log(thisGenData)
     
