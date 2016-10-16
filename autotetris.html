@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+    
+    <title>ACTAR.IO - Tetr.js</title>
+    
+    
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="tetris_auto.css">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    
+    <script src="chance.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+</head>
+    
+    
+<body>
+    <div id="topbar"><p>ACTAR.IO</p></div>
+    
+        <div id="gamearea">
+            <table id="gameboard">
+            </table>
+            
+            <div id="nextpiecearea"></div>
+            <div id="scorebox" class="infobox">
+                <p>Score:</p>
+                <p id="score">0</p>
+            </div>
+            <div id="rowbox" class="infobox">
+                <p>Row Clears:</p>
+                <p id="row">0</p>
+            </div>
+        </div>
+        
+        <div id="genealogy">
+            <h4>Genealogy</h4>
+            <p id="currgen">Current Generation: 0</p>
+            <ul id="gens">
+                
+            </ul>
+        </div>
+        
+        <div id="creaturedata">
+            
+            <h4>Creature Data</h4>
+            
+            <table class="dataport">
+                <tr id="cname">
+                    <th class="label">
+                        <p>Name:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cgen">
+                    <th class="label">
+                        <p>Generation:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cplace">
+                    <th class="label">
+                        <p>Place in Gen:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cscore">
+                    <th class="label">
+                        <p>Score Achieved:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cstatus">
+                    <th class="label">
+                        <p>Status:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+            </table>
+            
+            <table class="dataport">
+                <tr id="cvar0">
+                    <th class="label">
+                        <p>Height Max:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cvar1">
+                    <th class="label">
+                        <p>Height Avg:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cvar2">
+                    <th class="label">
+                        <p>Height Std. Dev.:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cvar3">
+                    <th class="label">
+                        <p>Covered Holes:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cvar4">
+                    <th class="label">
+                        <p>I-Only Holes:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+                <tr id="cvar5">
+                    <th class="label">
+                        <p>I-Only Holes - 1:</p>
+                    </th>
+                    <th class="value">
+                    </th>
+                </tr>
+            </table>
+            
+            <table class="dataport">
+                <tr id="familylabels">
+                    <th id="familyparentslabel">
+                        <p>Parents:</p>
+                    </th>
+                    <th id="familychildrenlabel">
+                        <p>Children:</p>
+                    </th>
+                </tr>
+                <tr id="familyids">
+                    <th id="familyparentids">
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                    </th>
+                    <th id="familychildrenids">
+        
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                    </th>
+                </tr>
+            </table>
+            
+        </div>
+        
+        <div id="progresschartwrapper">
+            <div id="progresschart">
+            
+            </div>
+        </div>
+        
+        
+    <div id="lowbar"><p>© 2016 - Will Clark</p></div>
+    <script src="tetris_auto.js"></script>
+</body>
+</html>
