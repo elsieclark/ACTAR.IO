@@ -352,11 +352,14 @@ var solveTruss = function(truss) {
         matrixB.push(6)
     }
     
+    
+    
+    console.log(matrixA)
+    console.log(matrixB)
+    
     trussLoading = math.lusolve(matrixA, matrixB)
     
-//    console.log(matrixA)
-//    console.log(matrixB)
-//    console.log(trussLoading)
+    console.log(trussLoading)
     
     for (i = 0; i < matrixSize; i++) {
         if (Math.abs(trussLoading[i][0]) > Math.abs(maxLoad)) {
@@ -385,6 +388,122 @@ var solveTruss = function(truss) {
 
 
 var createRandomTruss = function() {
+    /*
+    var newTruss = {
+                        points : [
+                            {
+                                x : 6,
+                                y : -8
+                            },
+                            {
+                                x : 6,
+                                y : 13
+                            },
+                            {
+                                x : 18,
+                                y : -10
+                            },
+                            {
+                                x : 18,
+                                y : 15
+                            } 
+                        ],
+                        connectors : [],
+                        maxLoad : 0,
+                        weight : 0
+                    }
+        
+        
+    newTruss.connectors.push({
+        start : base,
+        end : hinge,
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : hinge,
+        end : newTruss.points[0],
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : base,
+        end : newTruss.points[1],
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : base,
+        end : newTruss.points[0],
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : hinge,
+        end : newTruss.points[1],
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : base,
+        end : newTruss.points[2],
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : hinge,
+        end : newTruss.points[3],
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : newTruss.points[0],
+        end : newTruss.points[2],
+        width : 10,
+        loading : 0
+    })
+    
+    newTruss.connectors.push({
+        start : newTruss.points[1],
+        end : newTruss.points[3],
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : newTruss.points[0],
+        end : load,
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : newTruss.points[1],
+        end : load,
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : newTruss.points[2],
+        end : load,
+        width : 10,
+        loading : 0
+    })
+    newTruss.connectors.push({
+        start : newTruss.points[3],
+        end : load,
+        width : 10,
+        loading : 0
+    })
+
+    
+    solveTruss(newTruss)
+    */
+        
+    
     var randomNumber = 1,
         newTruss = {
                         points : [],
@@ -448,6 +567,7 @@ var createRandomTruss = function() {
 }
 
 var checkTruss = function(truss) {
+    
     var i = 0,
         j = 0,
         counter = 0,
@@ -484,8 +604,9 @@ var checkTruss = function(truss) {
                 counter++
             }
         }
+
         if (counter < targetCount) {
-            //console.log("a")
+            console.log("a " + i)
             return false
         }
         
@@ -494,12 +615,12 @@ var checkTruss = function(truss) {
     // Check solvable
     
     if ((truss.points.length + 3) * 2 < truss.connectors.length) {
-        //console.log("b")
+        console.log("b")
         return false
     }
     
     if (getDeterminant(truss) < 0.001) {
-        //console.log("c")
+        console.log("c" + getDeterminant(truss))
         return false
         
     }
