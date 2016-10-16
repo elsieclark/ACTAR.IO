@@ -405,11 +405,11 @@ var createRandomTruss = function() {
                     loading : 0
                 })
     
-    while (randomNumber > 0.2 || j < 3) {
+    while (randomNumber > 0.5 || j < 3) {
         j++
         randomNumber = Math.random()
         
-        newPoint = {x : (Math.random() * 15) + 7.5, y : (Math.random() * 16) - 8}
+        newPoint = {x : (Math.random() * 15) + 7.5, y : (Math.random() * 5) - 2.5}
         
         newTruss.points.push(newPoint)
         
@@ -428,7 +428,7 @@ var createRandomTruss = function() {
             var a = math.random()
             
             
-            if (a < 0.5) {
+            if (a < 0.7) {
                 newTruss.connectors.push(
                     {
                         start : newPoint,
@@ -485,6 +485,7 @@ var checkTruss = function(truss) {
             }
         }
         if (counter < targetCount) {
+            //console.log("a")
             return false
         }
         
@@ -493,10 +494,12 @@ var checkTruss = function(truss) {
     // Check solvable
     
     if ((truss.points.length + 3) * 2 < truss.connectors.length) {
+        //console.log("b")
         return false
     }
     
     if (getDeterminant(truss) < 0.001) {
+        //console.log("c")
         return false
         
     }
@@ -509,18 +512,19 @@ var checkTruss = function(truss) {
         length = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
         
         if (length < 5 || length > 23) {
+            //console.log("d")
             return false
         }
     }
     
-    /*
-    for(i = 0; i < truss.joints.length; i++) {
+    
+    for(i = 0; i < truss.points.length; i++) {
         
-        if (truss.joints[i].x < 0 || truss.joints[i].x > 30) {
+        if (truss.points[i].x < 4 || truss.points[i].x > 26) {
             return false
         }
     }
-    */
+    
     return true
     
 }
@@ -645,7 +649,7 @@ var mutateTruss = function(truss) {
     
     randNum = Math.random()
     
-    if (randNum < 0.2) {
+    if (randNum < 0.5) {
         newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 16) - 8}
         
         childTruss.points.push(newPoint)
@@ -665,7 +669,7 @@ var mutateTruss = function(truss) {
             var a = math.random()
             
             
-            if (a < 0.5) {
+            if (a < 0.8) {
                 childTruss.connectors.push(
                     {
                         start : newPoint,
@@ -728,15 +732,12 @@ var mutateTruss = function(truss) {
             for (k = 0; k < childTruss.connectors.length; k++) {
                 if ((Object.is(childTruss.connectors[k].start, targetPoint) && Object.is(childTruss.connectors[k].end, targetPointB)) || (Object.is(childTruss.connectors[k].end, targetPoint) && Object.is(childTruss.connectors[k].start, targetPointB))) {
                     doesExist = true
-                    console.log("happens")
                 }
             }
             
             if (!doesExist) {
                 if (Math.random() < 0.1) {
-                    console.log("")
-                    console.log(targetPoint)
-                    console.log(targetPointB)
+
                     
                     childTruss.connectors.push(
                         {
@@ -813,6 +814,7 @@ var copyTruss = function(truss) {
     for (i = 0; i < 100; i++) {
         nextGenData.push(createRandomTruss())
         solveTruss(nextGenData[i])
+        console.log(i)
     }
     
     //thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
