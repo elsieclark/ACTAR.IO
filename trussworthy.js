@@ -6,9 +6,9 @@ google.charts.setOnLoadCallback(drawChart);
 
 var chartData = [[0, 0, 0, 0]]
 
-var maxBeamLoading = 100 * 9.81 //Value in Newtons
+var maxBeamLoading = 100 //Value in Newtons
 
-var jointWeight = 1
+var jointWeight = 0.01
 var beamDensityPerCM = 1
 
 var viewedGen = 1
@@ -97,21 +97,21 @@ var drawTruss = function() {
     
     
 
-    c.canvas.width = x // 0.9 = 30cm, 0.3 = 10cm, 0.03 = 1 cm
-    c.canvas.height = y
+    c.canvas.width = x * 1.5 // 0.9 = 30cm, 0.3 = 10cm, 0.03 = 1 cm
+    c.canvas.height = y * 1.5
 
     c.beginPath()
     c.setLineDash([5, 0])
     c.lineWidth = 5
     c.strokeStyle = "#1C2733"
     c.moveTo(x * 0.05, 0)
-    c.lineTo(x * 0.05, y)
+    c.lineTo(x * 0.05, y * 1.5)
     c.stroke()
 
     c.beginPath()
     c.setLineDash([10, 6])
     c.moveTo(x * 0.95, 0)
-    c.lineTo(x * 0.95, y)
+    c.lineTo(x * 0.95, y *  1.5)
     c.stroke()
     
     c.setLineDash([5, 0])
@@ -121,8 +121,8 @@ var drawTruss = function() {
     
     $.each(truss.connectors, function() {
         c.beginPath()
-        c.moveTo(x * 0.05 + (this.start.x * 0.03 * x), y * 0.6 - (this.start.y * 0.03 * x))
-        c.lineTo(x * 0.05 + (this.end.x * 0.03 * x), y * 0.6 - (this.end.y * 0.03 * x))
+        c.moveTo(x * 0.05 + (this.start.x * 0.03 * x), y * 0.8 - (this.start.y * 0.03 * x))
+        c.lineTo(x * 0.05 + (this.end.x * 0.03 * x), y * 0.8 - (this.end.y * 0.03 * x))
         c.fill()
         c.stroke()
     })
@@ -130,23 +130,23 @@ var drawTruss = function() {
     c.strokeStyle = "#1C2733"
     
     c.beginPath()
-    c.arc(x * 0.05, y * 0.6, 10, 0, 2 * Math.PI)
+    c.arc(x * 0.05, y * 0.8, 10, 0, 2 * Math.PI)
     c.fill()
     c.stroke()
     
     c.beginPath()
-    c.arc(x * 0.05, y * 0.6 - (x * 0.15), 10, 0, 2 * Math.PI)
+    c.arc(x * 0.05, y * 0.8 - (x * 0.15), 10, 0, 2 * Math.PI)
     c.fill()
     c.stroke()
     
     c.beginPath()
-    c.arc(x * 0.95, y * 0.6, 10, 0, 2 * Math.PI)
+    c.arc(x * 0.95, y * 0.8, 10, 0, 2 * Math.PI)
     c.fill()
     c.stroke()
     
     $.each(truss.points, function() {
         c.beginPath()
-        c.arc(x * 0.05 + (this.x * 0.03 * x), y * 0.6 - (this.y * 0.03 * x), 10, 0, 2 * Math.PI) // 
+        c.arc(x * 0.05 + (this.x * 0.03 * x), y * 0.8 - (this.y * 0.03 * x), 10, 0, 2 * Math.PI) // 
         c.fill()
         c.stroke()
     })
@@ -299,6 +299,7 @@ var solveTruss = function(truss) {
         maxLoad = 0,
         deltaX = 0,
         deltaY = 0
+
     
     loadedRows = createEq(truss, load)
     
@@ -353,18 +354,25 @@ var solveTruss = function(truss) {
     
     trussLoading = math.lusolve(matrixA, matrixB)
     
+//    console.log(matrixA)
+//    console.log(matrixB)
+//    console.log(trussLoading)
+    
     for (i = 0; i < matrixSize; i++) {
         if (Math.abs(trussLoading[i][0]) > Math.abs(maxLoad)) {
             maxLoad = trussLoading[i][0]
         }
     }
+    
+    
     for (i = 0; i < matrixSize; i++) {
-        truss.connectors[i].loading = trussLoading[i][0] * (maxBeamLoading / maxLoad)
+        truss.connectors[i].loading = trussLoading[i][0]
     }
     
-    truss.maxLoad = (maxBeamLoading / Math.abs(maxLoad)) * 6
+    truss.maxLoad = (maxBeamLoading * 6 / Math.abs(maxLoad))    
     
-    truss.weight += truss.points.length * jointWeight
+    
+    truss.weight = truss.points.length * jointWeight
     
     for (i = 0; i < truss.connectors.length; i++) {
         deltaX = truss.connectors[i].end.x - truss.connectors[i].start.x
@@ -397,11 +405,11 @@ var createRandomTruss = function() {
                     loading : 0
                 })
     
-    while (randomNumber > 0.5 || j < 2) {
+    while (randomNumber > 0.2 || j < 3) {
         j++
         randomNumber = Math.random()
         
-        newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 16) - 8}
+        newPoint = {x : (Math.random() * 15) + 7.5, y : (Math.random() * 16) - 8}
         
         newTruss.points.push(newPoint)
         
@@ -444,7 +452,10 @@ var checkTruss = function(truss) {
         j = 0,
         counter = 0,
         targetPoint = {},
-        targetCount = 0
+        targetCount = 0,
+        deltaX = 0,
+        deltaY = 0,
+        length = 0
     
         // Check correct number of connections at each joint
     
@@ -490,6 +501,26 @@ var checkTruss = function(truss) {
         
     }
     
+    // check beam lengths
+    
+    for(i = 0; i < truss.connectors.length; i++) {
+        deltaX = Math.abs(truss.connectors[i].end.x - truss.connectors[i].start.x)
+        deltaY = Math.abs(truss.connectors[i].end.y - truss.connectors[i].start.y)
+        length = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+        
+        if (length < 5 || length > 23) {
+            return false
+        }
+    }
+    
+    /*
+    for(i = 0; i < truss.joints.length; i++) {
+        
+        if (truss.joints[i].x < 0 || truss.joints[i].x > 30) {
+            return false
+        }
+    }
+    */
     return true
     
 }
@@ -554,10 +585,14 @@ var mutateTruss = function(truss) {
     var childTruss = JSON.parse(JSON.stringify(truss)),
         randNum = Math.random(),
         targetPoint = 0,
+        targetPointB = 0,
         newPoint = 0,
         targetArr = [],
+        doesExist = false,
         i = 0,
-        j = 0
+        j = 0,
+        k = 0
+    
     for (i = -3; i < childTruss.points.length; i++) {
         switch (i) {
             case -3:
@@ -595,7 +630,7 @@ var mutateTruss = function(truss) {
             if (Object.is(targetPoint, childTruss.connectors[i].start)) {
                 targetArr.push(i)
             }
-            if (Object.is(targetPoint, childTruss.connectors[i].end)) {
+            else if (Object.is(targetPoint, childTruss.connectors[i].end)) {
                 targetArr.push(i)
             }
         }
@@ -610,7 +645,7 @@ var mutateTruss = function(truss) {
     
     randNum = Math.random()
     
-    if (randNum < 0.04) {
+    if (randNum < 0.2) {
         newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 16) - 8}
         
         childTruss.points.push(newPoint)
@@ -646,17 +681,80 @@ var mutateTruss = function(truss) {
     
     for (i = 0; i < childTruss.points.length; i++) {
         randNum = Math.random()
-        if (randNum < 0.2) {
+        if (randNum < 0.02) {
+            childTruss.points[i].x *= (randNum * 40 + 0.6)
+        } else if (randNum < 0.2) {
             childTruss.points[i].x *= (randNum + 0.9)
         }
         randNum = Math.random()
-        if (randNum < 0.2) {
+        if (randNum < 0.02) {
+            childTruss.points[i].y *= (randNum * 40 + 0.6)
+        } else if (randNum < 0.2) {
             childTruss.points[i].y *= (randNum + 0.9)
         }
     }
     
     // Add connection
-    /*
+    
+    for (i = -3; i < childTruss.points.length; i++) {
+        switch (i) {
+            case -3:
+                targetPoint = hinge
+                break
+            case -2:
+                targetPoint = base
+                break
+            case -1:
+                targetPoint = load
+                break
+            default:
+                targetPoint = childTruss.points[i]
+        }
+        
+        for (j = i+1; j < childTruss.points.length; j++) {
+            switch (j) {
+                case -2:
+                    targetPointB = base
+                    break
+                case -1:
+                    targetPointB = load
+                    break
+                default:
+                    targetPointB = childTruss.points[j]
+            }
+            
+            doesExist = false
+            
+            for (k = 0; k < childTruss.connectors.length; k++) {
+                if ((Object.is(childTruss.connectors[k].start, targetPoint) && Object.is(childTruss.connectors[k].end, targetPointB)) || (Object.is(childTruss.connectors[k].end, targetPoint) && Object.is(childTruss.connectors[k].start, targetPointB))) {
+                    doesExist = true
+                    console.log("happens")
+                }
+            }
+            
+            if (!doesExist) {
+                if (Math.random() < 0.1) {
+                    console.log("")
+                    console.log(targetPoint)
+                    console.log(targetPointB)
+                    
+                    childTruss.connectors.push(
+                        {
+                            start : targetPoint,
+                            end : targetPointB,
+                            width : 10,
+                            loading : 0
+                        })
+
+                }
+            }
+            
+        }
+        
+        
+        
+    }
+    
     // Remove connection
     
     for (i = 1; i < childTruss.connectors.length; i++) {
@@ -665,7 +763,7 @@ var mutateTruss = function(truss) {
         }
     }
     
-    */
+    
     
     if (checkTruss(childTruss)) {
         return childTruss
@@ -712,20 +810,22 @@ var copyTruss = function(truss) {
  setTimeout(function() {
     var i = 0
     
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 100; i++) {
         nextGenData.push(createRandomTruss())
         solveTruss(nextGenData[i])
     }
     
-    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    //thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+     
+     thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad) - (a.maxLoad)})
     
     historicalData.push({
         bestTruss : thisGenData[0],
-        medTruss : thisGenData[5],
-        worstTruss : thisGenData[9]
+        medTruss : thisGenData[50],
+        worstTruss : thisGenData[99]
     })
     
-    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[5].maxLoad / thisGenData[5].weight, thisGenData[9].maxLoad / thisGenData[9].weight])
+    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[50].maxLoad / thisGenData[50].weight, thisGenData[99].maxLoad / thisGenData[99].weight])
     
     updateInterface()
     drawChart()
@@ -735,24 +835,26 @@ var nextGen = function() {
     var i = 0
     
     nextGenData = []
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 50; i++) {
         nextGenData.push(thisGenData[i])
     }
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 50; i++) {
         nextGenData.push(mutateTruss(thisGenData[i]))
     }
     
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 100; i++) {
         solveTruss(nextGenData[i])
     }
     
-    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    //thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    
+    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad) - (a.maxLoad)})
     
     historicalData.push({
         bestTruss : thisGenData[0],
-        medTruss : thisGenData[5],
-        worstTruss : thisGenData[9]
+        medTruss : thisGenData[50],
+        worstTruss : thisGenData[99]
     })
     
     $('#gencurrent').html(historicalData.length)
@@ -763,9 +865,9 @@ var nextGen = function() {
     
     updateInterface()
     
-    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[5].maxLoad / thisGenData[5].weight, thisGenData[9].maxLoad / thisGenData[9].weight])
+    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[50].maxLoad / thisGenData[50].weight, thisGenData[99].maxLoad / thisGenData[99].weight])
     
-    console.log(thisGenData)
+    //console.log(thisGenData)
     
     if (autoProgress) {
         setTimeout(nextGen, 0)
