@@ -13,6 +13,8 @@ var beamDensityPerCM = 1
 
 var viewedGen = 1
 
+var autoProgress = false
+
 var hinge = {
     x : 0,
     y : 5
@@ -39,7 +41,7 @@ var historicalData = [
     
     ]
 */
-function drawChart() {
+var drawChart = function() {
     var data = new google.visualization.DataTable()
     
     data.addColumn('number', 'Generation')
@@ -84,10 +86,6 @@ function drawChart() {
     //chart.draw(data, options);
     chart.draw(data, google.charts.Line.convertOptions(options))
 }
-
-setTimeout(drawChart, 1000)
-
-$('#selectgen').on("input", setViewedGen)
 
 
 var drawTruss = function() {
@@ -155,11 +153,27 @@ var drawTruss = function() {
     
 }
 
-
-var setViewedGen = function() {
+var updateInterface = function() {
+    
     viewedGen = $('#selectgen').val()
+    
     $('#controltile h3').html("Generation: " + viewedGen)
     drawTruss()
+    
+    $('#databox p').html(JSON.stringify(historicalData[viewedGen - 1].bestTruss))
+    
+    $('.gendatavalue').eq(0).html((historicalData[viewedGen - 1].bestTruss.maxLoad / historicalData[viewedGen - 1].bestTruss.weight).toFixed(2))
+    $('.gendatavalue').eq(1).html(historicalData[viewedGen - 1].bestTruss.maxLoad.toFixed(2))
+    $('.gendatavalue').eq(2).html(historicalData[viewedGen - 1].bestTruss.weight.toFixed(2))
+    
+    $('.gendatavalue').eq(3).html((historicalData[viewedGen - 1].medTruss.maxLoad / historicalData[viewedGen - 1].medTruss.weight).toFixed(2))
+    $('.gendatavalue').eq(4).html(historicalData[viewedGen - 1].medTruss.maxLoad.toFixed(2))
+    $('.gendatavalue').eq(5).html(historicalData[viewedGen - 1].medTruss.weight.toFixed(2))
+    
+    $('.gendatavalue').eq(6).html((historicalData[viewedGen - 1].worstTruss.maxLoad / historicalData[viewedGen - 1].worstTruss.weight).toFixed(2))
+    $('.gendatavalue').eq(7).html(historicalData[viewedGen - 1].worstTruss.maxLoad.toFixed(2))
+    $('.gendatavalue').eq(8).html(historicalData[viewedGen - 1].worstTruss.weight.toFixed(2))
+    
 }
 
 
@@ -337,11 +351,10 @@ var solveTruss = function(truss) {
         matrixB.push(6)
     }
     
-    //console.log("Determinant: " + math.det(matrixA))
     trussLoading = math.lusolve(matrixA, matrixB)
     
     for (i = 0; i < matrixSize; i++) {
-        if (trussLoading[i][0] > maxLoad) {
+        if (Math.abs(trussLoading[i][0]) > Math.abs(maxLoad)) {
             maxLoad = trussLoading[i][0]
         }
     }
@@ -349,7 +362,7 @@ var solveTruss = function(truss) {
         truss.connectors[i].loading = trussLoading[i][0] * (maxBeamLoading / maxLoad)
     }
     
-    truss.maxLoad = (maxBeamLoading / maxLoad) * 6
+    truss.maxLoad = (maxBeamLoading / Math.abs(maxLoad)) * 6
     
     truss.weight += truss.points.length * jointWeight
     
@@ -359,13 +372,8 @@ var solveTruss = function(truss) {
         truss.weight += math.sqrt(deltaX * deltaX + deltaY * deltaY) * beamDensityPerCM
     }
     
-//    console.log(truss.maxLoad)
-//    console.log(truss.weight)
-//    console.log(truss.maxLoad / truss.weight)
     
 }
-
-solveTruss(exTruss)
 
 
 var createRandomTruss = function() {
@@ -543,49 +551,257 @@ var getDeterminant = function(truss) {
 }
 
 var mutateTruss = function(truss) {
+    var childTruss = JSON.parse(JSON.stringify(truss)),
+        randNum = Math.random(),
+        targetPoint = 0,
+        newPoint = 0,
+        targetArr = [],
+        i = 0,
+        j = 0
+    for (i = -3; i < childTruss.points.length; i++) {
+        switch (i) {
+            case -3:
+                targetPoint = hinge
+                break
+            case -2:
+                targetPoint = base
+                break
+            case -1:
+                targetPoint = load
+                break
+            default:
+                targetPoint = childTruss.points[i]
+                break
+        }
+        
+        for (j = 0; j < childTruss.connectors.length; j++) {
+            if (JSON.stringify(targetPoint) === JSON.stringify(childTruss.connectors[j].start)) {
+                childTruss.connectors[j].start = targetPoint
+            }
+            if (JSON.stringify(targetPoint) === JSON.stringify(childTruss.connectors[j].end)) {
+                childTruss.connectors[j].end = targetPoint
+            }
+        }    
+    }  
+    
+    
+    // Remove vertex
+    
+    if (randNum < 0.04) {
+        randNum = math.floor(math.random * childTruss.points.length * 25)
+        targetPoint = childTruss.points.splice(randNum, 1)
+        
+        for (i = 0; i < childTruss.connectors.length; i++) {
+            if (Object.is(targetPoint, childTruss.connectors[i].start)) {
+                targetArr.push(i)
+            }
+            if (Object.is(targetPoint, childTruss.connectors[i].end)) {
+                targetArr.push(i)
+            }
+        }
+        
+        for (i = 0; i < targetArr.length; i++) {
+            childTruss.connectors.splice(targetArr.pop(), 1)
+        }
+        
+    }
+    
+    // Add vertex
+    
+    randNum = Math.random()
+    
+    if (randNum < 0.04) {
+        newPoint = {x : (Math.random() * 25) + 2.5, y : (Math.random() * 16) - 8}
+        
+        childTruss.points.push(newPoint)
+        
+        
+        for (i = -3; i < childTruss.points.length - 1; i++) {
+            if (i === -3) {
+                targetPoint = load
+            } else if (i === -2) {
+                targetPoint = base
+            } else if (i === -1) {
+                targetPoint = hinge
+            } else {
+                targetPoint = childTruss.points[i]
+            }
+            
+            var a = math.random()
+            
+            
+            if (a < 0.5) {
+                childTruss.connectors.push(
+                    {
+                        start : newPoint,
+                        end : targetPoint,
+                        width : 10,
+                        loading : 0
+                    })
+            }
+        }
+    }
+    
+    // Move vertex
+    
+    for (i = 0; i < childTruss.points.length; i++) {
+        randNum = Math.random()
+        if (randNum < 0.2) {
+            childTruss.points[i].x *= (randNum + 0.9)
+        }
+        randNum = Math.random()
+        if (randNum < 0.2) {
+            childTruss.points[i].y *= (randNum + 0.9)
+        }
+    }
+    
+    // Add connection
+    /*
+    // Remove connection
+    
+    for (i = 1; i < childTruss.connectors.length; i++) {
+        if (Math.random() < 0.03) {
+            childTruss.connectors.splice(i, 1)
+        }
+    }
+    
+    */
+    
+    if (checkTruss(childTruss)) {
+        return childTruss
+    } else {
+        return mutateTruss(truss)
+    }
     
 }
 
-var startEvolution = (function() {
-    var i = 0
+var copyTruss = function(truss) {
+    var copyTruss = JSON.parse(JSON.stringify(truss)),
+        targetPoint = 0,
+        i = 0,
+        j = 0
     
-    for (i = 0; i < 1000; i++) {
-        thisGenData.push(createRandomTruss())
-        solveTruss(thisGenData[i])
+    for (i = -3; i < copyTruss.points.length; i++) {
+        switch (i) {
+            case -3:
+                targetPoint = hinge
+                break
+            case -2:
+                targetPoint = base
+                break
+            case -1:
+                targetPoint = load
+                break
+            default:
+                targetPoint = copyTruss.points[i]
+                break
+        }
+        
+        for (j = 0; j < copyTruss.connectors.length; j++) {
+            if (JSON.stringify(targetPoint) === JSON.stringify(copyTruss.connectors[j].start)) {
+                copyTruss.connectors[j].start = targetPoint
+            }
+            if (JSON.stringify(targetPoint) === JSON.stringify(copyTruss.connectors[j].end)) {
+                copyTruss.connectors[j].end = targetPoint
+            }
+        }    
     }
-    
-    thisGenData = thisGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
-    
-    historicalData.push({
-        bestTruss : thisGenData[0],
-        medTruss : thisGenData[500],
-        worstTruss : thisGenData[999]
-    })
-    console.log("a")
-    drawTruss()
-})()
+    return copyTruss
+}
 
-var nextGen = function() {
+ setTimeout(function() {
     var i = 0
     
-    nextGenData = []
-    
-    for (i = 0; i < 500; i++) {
-        nextGenData.push(thisGenData[i])
-    }
-    
-    for (i = 0; i < 500; i++) {
-        nextGenData.push(mutateTruss(thisGenData[i]))
+    for (i = 0; i < 10; i++) {
+        nextGenData.push(createRandomTruss())
+        solveTruss(nextGenData[i])
     }
     
     thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
     
     historicalData.push({
         bestTruss : thisGenData[0],
-        medTruss : thisGenData[500],
-        worstTruss : thisGenData[999]
+        medTruss : thisGenData[5],
+        worstTruss : thisGenData[9]
     })
-    drawTruss()
+    
+    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[5].maxLoad / thisGenData[5].weight, thisGenData[9].maxLoad / thisGenData[9].weight])
+    
+    updateInterface()
+    drawChart()
+}, 500)
+
+var nextGen = function() {
+    var i = 0
+    
+    nextGenData = []
+    for (i = 0; i < 5; i++) {
+        nextGenData.push(thisGenData[i])
+    }
+
+    for (i = 0; i < 5; i++) {
+        nextGenData.push(mutateTruss(thisGenData[i]))
+    }
+    
+    for (i = 0; i < 10; i++) {
+        solveTruss(nextGenData[i])
+    }
+    
+    thisGenData = nextGenData.sort(function(a, b){return (b.maxLoad / b.weight) - (a.maxLoad / a.weight)})
+    
+    historicalData.push({
+        bestTruss : thisGenData[0],
+        medTruss : thisGenData[5],
+        worstTruss : thisGenData[9]
+    })
+    
+    $('#gencurrent').html(historicalData.length)
+    $('#selectgen').attr({max : historicalData.length})
+    
+    $('#selectgen')[0].value = historicalData.length
+    $('#selectgen').trigger("input")
+    
+    updateInterface()
+    
+    chartData.push([historicalData.length, thisGenData[0].maxLoad / thisGenData[0].weight, thisGenData[5].maxLoad / thisGenData[5].weight, thisGenData[9].maxLoad / thisGenData[9].weight])
+    
+    console.log(thisGenData)
+    
+    if (autoProgress) {
+        setTimeout(nextGen, 0)
+    } else {
+        drawChart()
+    }
+    
 }
 
+$('#selectgen').on("input", updateInterface)
+
 //setViewedGen()
+
+$('#evolvecontinuous').click(function() {
+    autoProgress = !autoProgress
+    
+    if (autoProgress) {
+        $('#evolvecontinuous p').html("Pause Evolution")
+        $('#evolvecontinuous').addClass("activecontrol")
+        $('#evolvecontinuous').removeClass("inactivecontrol")
+        $('#evolvenext').addClass("disabledcontrol")
+        $('#evolvenext').removeClass("enabledcontrol")
+        nextGen()
+    } else {
+        $('#evolvecontinuous p').html("Continuously Evolve Gens")
+        $('#evolvecontinuous').removeClass("activecontrol")
+        $('#evolvecontinuous').addClass("inactivecontrol")
+        $('#evolvenext').removeClass("disabledcontrol")
+        $('#evolvenext').addClass("enabledcontrol")
+        drawChart()
+    }
+    
+})
+
+$('#evolvenext').click(function() {
+    if (!autoProgress) {
+        nextGen()
+    }
+})

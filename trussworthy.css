@@ -67,14 +67,9 @@ body {
     width: calc(50% - 27px);
     margin: 20px 0 0 15px;
     height: 80px;
-    background-color: #4A5A70;
     float: left;
     border: 2px solid white;
-}
-
-.controlbutton:hover {
-    background-color: #6A81A1;
-    cursor: pointer;
+    color: white;
 }
 
 .controlbutton p {
@@ -82,12 +77,45 @@ body {
     margin: 24px 0 0 0;
     text-align: center;
     font-size: 25px;
+}
+
+.activecontrol {
+    background-color: #F5AC07;
+    color: #1C2733;
+}
+
+.activecontrol:hover {
+    background-color: #FFBE37;
+    cursor: pointer;
+}
+
+.inactivecontrol {
+    background-color: #4A5A70;
     color: white;
 }
 
+.inactivecontrol:hover {
+    background-color: #6A81A1;
+    cursor: pointer;
+}
+
+.disabledcontrol {
+    opacity: 0.2;
+}
+
+.enabledcontrol {
+    background-color: #4A5A70;
+    cursor: pointer;
+}
+
+.enabledcontrol:hover {
+    background-color: #6A81A1;
+    cursor: pointer;
+}
+
 #selectgen {
-    width: calc(100% - 100px);
-    margin: 15px 50px 15px 50px;
+    width: calc(100% - 140px);
+    margin: 15px 70px 15px 70px;
     position: absolute;
     bottom: 5px;
 }
@@ -209,12 +237,13 @@ h3 {
 }
 
 #databox {
-    width: calc(100% - 10px);
-    height: calc(100% - 40px);
+    width: calc(100% - 30px);
+    height: calc(100% - 60px);
     margin: 5px 0 0 5px;
+    padding: 10px;
     background-color: #4A5A70;
     border-radius: 4px;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #databox p {
@@ -222,10 +251,8 @@ h3 {
     padding: 8px;
     color: white;
     font-size: 13px;
+    word-wrap: break-word;
 }
-
-
-
 
 
 #topbar {
