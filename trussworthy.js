@@ -25,7 +25,7 @@ var base = {
 }
 var load = {
     x : 30,
-    y : 0
+    y : 5
 }
 
 var thisGenData = []
@@ -140,7 +140,7 @@ var drawTruss = function() {
     c.stroke()
     
     c.beginPath()
-    c.arc(x * 0.95, y * 0.8, 10, 0, 2 * Math.PI)
+    c.arc(x * 0.95, y * 0.8 - (x * 0.15), 10, 0, 2 * Math.PI)
     c.fill()
     c.stroke()
     
@@ -309,14 +309,14 @@ var solveTruss = function(truss) {
     }
     if (matrixA.length < matrixSize) {
         matrixA.push(loadedRows.yRow)
-        matrixB.push(-6)
+        matrixB.push(-1)
     }
     
     loadedRows = createEq(truss, base)
     
     if (matrixA.length < matrixSize) {
         matrixA.push(loadedRows.xRow)
-        matrixB.push(1)
+        matrixB.push(6)
     }
     if (matrixA.length < matrixSize) {
         matrixA.push(loadedRows.yRow)
@@ -344,12 +344,12 @@ var solveTruss = function(truss) {
     
     if (matrixA.length < matrixSize) {
         matrixA.push(loadedRows.xRow)
-        matrixB.push(-1)
+        matrixB.push(-6)
     }
     
     if (matrixA.length < matrixSize) {
         matrixA.push(loadedRows.yRow)
-        matrixB.push(6)
+        matrixB.push(1)
     }
     
     
@@ -372,7 +372,7 @@ var solveTruss = function(truss) {
         truss.connectors[i].loading = trussLoading[i][0]
     }
     
-    truss.maxLoad = (maxBeamLoading * 6 / Math.abs(maxLoad))    
+    truss.maxLoad = (maxBeamLoading / Math.abs(maxLoad))    
     
     
     truss.weight = truss.points.length * jointWeight
@@ -524,7 +524,7 @@ var createRandomTruss = function() {
                     loading : 0
                 })
     
-    while (randomNumber > 0.5 || j < 3) {
+    while (randomNumber > 0.5 || j < 2) {
         j++
         randomNumber = Math.random()
         
